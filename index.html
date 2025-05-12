@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TikTok Downloader</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     * {
       margin: 0;
@@ -12,95 +11,89 @@
       box-sizing: border-box;
     }
     body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #00f2ea, #7b2ff7);
       font-family: 'Poppins', sans-serif;
-      background-color: #0d0d0d;
-      color: #f1f1f1;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       padding: 20px;
-    }
-    .container {
-      background-color: #1a1a1a;
-      padding: 260px 25px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 460px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-    .logo {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    .logo img {
-      width: 48px;
-      height: 48px;
+      color: #fff;
     }
     h1 {
-      font-size: 1.8rem;
-      text-align: center;
       margin-bottom: 20px;
-      font-weight: 600;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
     }
     input {
       width: 100%;
-      padding: 12px;
+      padding: 12px 15px;
+      margin-bottom: 10px;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
-      background-color: #2c2c2c;
-      color: #fff;
-      margin-bottom: 15px;
+      outline: none;
     }
     .button-group {
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
     button {
       flex: 1;
       padding: 10px;
-      background-color: #333;
       border: none;
       border-radius: 8px;
-      color: #f1f1f1;
-      font-weight: 600;
+      background: #fff;
+      color: #7b2ff7;
+      font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s, color 0.3s;
     }
     button:hover {
-      background-color: #444;
+      background: #7b2ff7;
+      color: #fff;
+    }
+    #result {
+      margin-top: 20px;
     }
     #loading {
-      text-align: center;
-      font-size: 1rem;
-      margin-top: 10px;
+      margin-top: 20px;
+      font-size: 1.2rem;
       animation: blink 1s infinite;
     }
     @keyframes blink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
-    #result {
-      margin-top: 20px;
-      text-align: center;
+    p {
+      margin-top: 10px;
+      font-size: 1.1rem;
     }
     video {
+      margin-top: 20px;
       width: 100%;
-      margin-top: 10px;
       border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
   </style>
 </head>
 <body>
+  <h1>TikTok Downloader</h1>
   <div class="container">
-    <div class="logo">
-      <img src="https://raw.githubusercontent.com/Fiisya/uploads/main/uploads/1747051496492.jpeg" alt="TikTok Logo" />
-    </div>
-    <h1>TikTok Downloader</h1>
-    <input type="text" id="urlInput" placeholder="Masukkan URL TikTok..." />
+    <input type="text" id="urlInput" placeholder="Masukkan URL TikTok...">
     <div class="button-group">
       <button onclick="pasteLink()">Paste</button>
       <button onclick="deleteLink()">Hapus</button>
@@ -114,52 +107,55 @@
     async function pasteLink() {
       try {
         const text = await navigator.clipboard.readText();
-        document.getElementById("urlInput").value = text;
-      } catch {
-        alert("Gagal mengakses clipboard!");
+        document.getElementById('urlInput').value = text;
+      } catch (err) {
+        alert('Gagal mengakses clipboard!');
       }
     }
 
     function deleteLink() {
-      document.getElementById("urlInput").value = "";
-      document.getElementById("result").innerHTML = "";
-      document.getElementById("loading").style.display = "none";
+      document.getElementById('urlInput').value = '';
+      document.getElementById('result').innerHTML = '';
+      document.getElementById('loading').style.display = 'none';
     }
 
     async function download() {
-      const url = document.getElementById("urlInput").value;
-      if (!url) return alert("Masukkan URL TikTok!");
-
-      const loading = document.getElementById("loading");
-      const result = document.getElementById("result");
-      loading.style.display = "block";
-      result.innerHTML = "";
+      const url = document.getElementById('urlInput').value;
+      if (!url) return alert('Masukkan URL TikTok!');
+      
+      const loading = document.getElementById('loading');
+      const result = document.getElementById('result');
+      loading.style.display = 'block';
+      result.innerHTML = '';
 
       try {
-        const res = await fetch("/api/tiktok", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
+        const res = await fetch('/api/tiktok', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
         });
         const data = await res.json();
-        loading.style.display = "none";
+        loading.style.display = 'none';
 
         if (data.success) {
           result.innerHTML = `
             <p>✅ Video berhasil didapatkan:</p>
             <video controls src="${data.videoUrl}"></video>
           `;
-          const a = document.createElement("a");
+          
+          const a = document.createElement('a');
           a.href = data.videoUrl;
-          a.download = "tiktok-video.mp4";
+          a.download = 'tiktok-video.mp4';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
+
         } else {
           result.innerHTML = `<p style="color: #ff4c4c;">${data.message}</p>`;
         }
-      } catch {
-        loading.style.display = "none";
+      } catch (error) {
+        console.error(error);
+        loading.style.display = 'none';
         result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan saat mengunduh video.</p>`;
       }
     }
