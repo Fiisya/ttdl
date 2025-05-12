@@ -1,7 +1,9 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ message: 'Metode tidak diizinkan' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Metode tidak diizinkan' });
+  }
 
   const { url } = req.body;
 
