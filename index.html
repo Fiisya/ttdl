@@ -92,16 +92,6 @@
       border-radius: 10px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.3);
     }
-    a.download-link {
-      display: inline-block;
-      margin-top: 10px;
-      color: #0aefff;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    a.download-link:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
 <body>
@@ -120,63 +110,61 @@
     <div id="result"></div>
   </div>
 
-  <script>
-    async function pasteLink() {
-      try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById("urlInput").value = text;
-      } catch {
-        alert("Gagal mengakses clipboard!");
-      }
+  <!-- ... (keep the <head> and style as-is) ... -->
+<script>
+  async function pasteLink() {
+    try {
+      const text = await navigator.clipboard.readText();
+      document.getElementById("urlInput").value = text;
+    } catch {
+      alert("Gagal mengakses clipboard!");
     }
+  }
 
-    function deleteLink() {
-      document.getElementById("urlInput").value = "";
-      document.getElementById("result").innerHTML = "";
-      document.getElementById("loading").style.display = "none";
-    }
+  function deleteLink() {
+    document.getElementById("urlInput").value = "";
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("loading").style.display = "none";
+  }
 
-    async function download() {
-      const url = document.getElementById("urlInput").value.trim();
-      const loading = document.getElementById("loading");
-      const result = document.getElementById("result");
+  async function download() {
+    const url = document.getElementById("urlInput").value;
+    if (!url) return alert("Masukkan URL TikTok!");
 
-      if (!url || !url.includes("tiktok.com")) {
-        alert("Masukkan URL TikTok yang valid!");
-        return;
+    const loading = document.getElementById("loading");
+    const result = document.getElementById("result");
+    loading.style.display = "block";
+    result.innerHTML = "";
+
+    try {
+      const apiUrl = `https://api.alfixd.my.id/api/ttdl?url=${encodeURIComponent(url)}`;
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+      loading.style.display = "none";
+
+      if (data.status === 200 && data.download_links.length) {
+        const mediaHtml = data.download_links.map(link => {
+          const isImage = /\.(jpeg|jpg|png|webp)/i.test(link.url);
+          const isAudio = /\.mp3/i.test(link.url);
+          if (isImage) {
+            return `<img src="${link.url}" alt="Photo Mode" style="max-width:100%; border-radius:10px; margin-bottom:10px;" loading="lazy" />`;
+          } else if (isAudio) {
+            return `<audio controls src="${link.url}" style="width:100%; margin-bottom:10px;"></audio>`;
+          } else {
+            return `<video controls src="${link.url}" style="width:100%; border-radius:10px; margin-bottom:10px;"></video>`;
+          }
+        }).join("");
+
+        result.innerHTML = `<p>✅ Media berhasil didapatkan:</p>${mediaHtml}`;
+      } else {
+        result.innerHTML = `<p style="color: #ff4c4c;">Tidak ada media ditemukan.</p>`;
       }
-
-      loading.style.display = "block";
-      result.innerHTML = "";
-
-      try {
-        const response = await fetch(`https://api.alfixd.my.id/api/ttdl?url=${encodeURIComponent(url)}`);
-        const data = await response.json();
-        loading.style.display = "none";
-
-        if (data.status !== 200 || !data.download_links) {
-          result.innerHTML = `<p style="color: #ff4c4c;">Gagal mengambil video. Pastikan link benar.</p>`;
-          return;
-        }
-
-        const sd = data.download_links.find(link => link.quality === "sd");
-
-        if (!sd) {
-          result.innerHTML = `<p style="color: #ff4c4c;">Video kualitas SD tidak ditemukan.</p>`;
-          return;
-        }
-
-        result.innerHTML = `
-          <p>✅ Video berhasil didapatkan:</p>
-          <video controls src="${sd.url}"></video>
-          <a class="download-link" href="${sd.url}" download="tiktok-video.mp4">Klik untuk unduh video</a>
-        `;
-      } catch (err) {
-        console.error(err);
-        loading.style.display = "none";
-        result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan saat mengunduh video.</p>`;
-      }
+    } catch (err) {
+      loading.style.display = "none";
+      result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan saat mengambil data.</p>`;
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
