@@ -92,6 +92,16 @@
       border-radius: 10px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.3);
     }
+    a.download-link {
+      display: inline-block;
+      margin-top: 10px;
+      color: #0aefff;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    a.download-link:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -127,38 +137,42 @@
     }
 
     async function download() {
-      const url = document.getElementById("urlInput").value;
-      if (!url) return alert("Masukkan URL TikTok!");
-
+      const url = document.getElementById("urlInput").value.trim();
       const loading = document.getElementById("loading");
       const result = document.getElementById("result");
+
+      if (!url || !url.includes("tiktok.com")) {
+        alert("Masukkan URL TikTok yang valid!");
+        return;
+      }
+
       loading.style.display = "block";
       result.innerHTML = "";
 
       try {
-        const res = await fetch("/api/tiktok", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
-        });
-        const data = await res.json();
+        const response = await fetch(`https://api.alfixd.my.id/api/ttdl?url=${encodeURIComponent(url)}`);
+        const data = await response.json();
         loading.style.display = "none";
 
-        if (data.success) {
-          result.innerHTML = `
-            <p>✅ Video berhasil didapatkan:</p>
-            <video controls src="${data.videoUrl}"></video>
-          `;
-          const a = document.createElement("a");
-          a.href = data.videoUrl;
-          a.download = "tiktok-video.mp4";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        } else {
-          result.innerHTML = `<p style="color: #ff4c4c;">${data.message}</p>`;
+        if (data.status !== 200 || !data.download_links) {
+          result.innerHTML = `<p style="color: #ff4c4c;">Gagal mengambil video. Pastikan link benar.</p>`;
+          return;
         }
-      } catch {
+
+        const sd = data.download_links.find(link => link.quality === "sd");
+
+        if (!sd) {
+          result.innerHTML = `<p style="color: #ff4c4c;">Video kualitas SD tidak ditemukan.</p>`;
+          return;
+        }
+
+        result.innerHTML = `
+          <p>✅ Video berhasil didapatkan:</p>
+          <video controls src="${sd.url}"></video>
+          <a class="download-link" href="${sd.url}" download="tiktok-video.mp4">Klik untuk unduh video</a>
+        `;
+      } catch (err) {
+        console.error(err);
         loading.style.display = "none";
         result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan saat mengunduh video.</p>`;
       }
