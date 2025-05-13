@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>TikTok Downloader</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f5f5f5;
@@ -29,24 +25,9 @@
       align-items: center;
       text-align: center;
     }
-    .logo {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    .logo img {
-      width: 48px;
-      height: 48px;
-    }
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-    p {
-      font-size: 1rem;
-      margin-bottom: 20px;
-      color: #f1f1f1;
-    }
+    .logo img { width: 48px; height: 48px; }
+    h1 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 600; }
+    p { font-size: 1rem; margin-bottom: 20px; color: #f1f1f1; }
     .input-group {
       display: flex;
       gap: 10px;
@@ -73,9 +54,7 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-    .paste-btn:hover {
-      background-color: #d1d9ff;
-    }
+    .paste-btn:hover { background-color: #d1d9ff; }
     .download-btn {
       width: 100%;
       max-width: 500px;
@@ -89,9 +68,7 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-    .download-btn:hover {
-      background-color: #00b046;
-    }
+    .download-btn:hover { background-color: #00b046; }
     #loading {
       font-size: 1rem;
       margin-top: 10px;
@@ -106,11 +83,22 @@
       max-width: 500px;
       width: 100%;
     }
-    video {
-      width: 100%;
+    .download-link {
+      display: block;
       margin-top: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+      padding: 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      background-color: #6200ea;
+      transition: background 0.3s;
+    }
+    .download-link:hover { background-color: #4a00c1; }
+    video, img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 1rem;
     }
     footer {
       text-align: center;
@@ -122,24 +110,22 @@
   </style>
 </head>
 <body>
-    <div class="container">
-    <div class="logo">
-      <img src="https://raw.githubusercontent.com/Fiisya/uploads/main/uploads/1747051496492.jpeg" alt="TikTok Logo" />
-    </div>
+  <div class="container">
+    <div class="logo"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046122.png" alt="Logo"></div>
     <h1>TikTok Downloader</h1>
-    <p>Tiktok Downloader Tanpa Watermark. Cepat. Semua perangkat</p>
+    <p>Tempel tautan TikTok dan unduh video atau gambar tanpa watermark</p>
+
     <div class="input-group">
-      <input type="text" id="urlInput" placeholder="Tempel tautan TikTok di sini" />
+      <input type="text" id="urlInput" placeholder="Masukkan URL TikTok...">
       <button class="paste-btn" onclick="pasteLink()">Tempel</button>
     </div>
     <button class="download-btn" onclick="download()">Download</button>
-
-    <div id="result"></div>
     <div id="loading" style="display:none;">Loading...</div>
+    <div id="result"></div>
   </div>
 
   <footer>
-    © 2025 AlfixD. All rights reserved.
+    &copy; 2025 AlfixD. All rights reserved.
   </footer>
 
   <script>
@@ -162,31 +148,48 @@
       result.innerHTML = "";
 
       try {
-        const apiUrl = `https://api.alfixd.my.id/api/ttdl?url=${encodeURIComponent(url)}`;
-        const res = await fetch(apiUrl);
-        const data = await res.json();
+        const resVideo = await fetch(`https://api.siputzx.my.id/api/tiktok/v2?url=${encodeURIComponent(url)}`);
+        const jsonVideo = await resVideo.json();
+
+        const resImage = await fetch(`https://api.alfixd.my.id/api/ttdl?url=${encodeURIComponent(url)}`);
+        const jsonImage = await resImage.json();
+
         loading.style.display = "none";
+        let html = "";
 
-        if (data.status === 200 && data.download_links.length) {
-          const mediaHtml = data.download_links.map(link => {
-            const isImage = /\.(jpeg|jpg|png|webp)/i.test(link.url);
-            const isAudio = /\.mp3/i.test(link.url);
-            if (isImage) {
-              return `<img src="${link.url}" alt="Photo Mode" style="max-width:100%; border-radius:10px; margin-bottom:10px;" loading="lazy" />`;
-            } else if (isAudio) {
-              return `<audio controls src="${link.url}" style="width:100%; margin-bottom:10px;"></audio>`;
-            } else {
-              return `<video controls src="${link.url}" style="width:100%; border-radius:10px; margin-bottom:10px;"></video>`;
-            }
-          }).join("");
+        if (jsonVideo.success && jsonVideo.data.download?.video?.length) {
+          const videos = jsonVideo.data.download.video;
+          const audio = jsonVideo.data.download.audio;
 
-          result.innerHTML = `<p>✅ Media berhasil didapatkan:</p>${mediaHtml}`;
-        } else {
-          result.innerHTML = `<p style="color: #ff4c4c;">Tidak ada media ditemukan.</p>`;
+          html += `<p class="mb-2 font-semibold">Preview Video:</p>`;
+          html += `<video controls src="${videos[0]}"></video>`;
+
+          videos.forEach((link, index) => {
+            const label = index === 0 ? "Download SD" : index === 1 ? "Download HD" : `Mirror ${index + 1}`;
+            html += `<a href="${link}" download class="download-link">${label}</a>`;
+          });
+
+          if (audio) {
+            html += `<a href="${audio}" download class="download-link" style="background-color:#ff5722;">Download Audio</a>`;
+          }
         }
+
+        if (jsonImage.status === 200 && jsonImage.download_links?.length) {
+          html += `<p class="mb-2 mt-4 font-semibold">Photo Mode:</p>`;
+          jsonImage.download_links.forEach(link => {
+            if (/\.(jpg|jpeg|png|webp)/i.test(link.url)) {
+              html += `<img src="${link.url}" loading="lazy" />`;
+              html += `<a href="${link.url}" download class="download-link" style="background-color:#009688;">Download Gambar</a>`;
+            }
+          });
+        }
+
+        if (!html) html = `<p style="color: #ff4c4c;">Media tidak ditemukan.</p>`;
+        result.innerHTML = html;
       } catch (err) {
+        console.error(err);
         loading.style.display = "none";
-        result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan saat mengambil data.</p>`;
+        result.innerHTML = `<p style="color: #ff4c4c;">Gagal mengambil data. Periksa koneksi atau URL TikTok!</p>`;
       }
     }
   </script>
