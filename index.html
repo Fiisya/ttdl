@@ -13,21 +13,21 @@
     }
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #0d0d0d;
-      color: #f1f1f1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background-color: #f5f5f5;
+      color: #fff;
       min-height: 100vh;
-      padding: 20px;
+      display: flex;
+      flex-direction: column;
     }
     .container {
-      background-color: #1a1a1a;
-      padding: 260px 25px;
-      border-radius: 12px;
+      background-color: #0056ff;
+      padding: 30px;
       width: 100%;
-      max-width: 460px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
     .logo {
       text-align: center;
@@ -39,41 +39,60 @@
     }
     h1 {
       font-size: 1.8rem;
-      text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       font-weight: 600;
     }
-    input {
+    p {
+      font-size: 1rem;
+      margin-bottom: 20px;
+      color: #f1f1f1;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      max-width: 500px;
       width: 100%;
+    }
+    input {
+      flex: 1;
       padding: 12px;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
-      background-color: #2c2c2c;
-      color: #fff;
-      margin-bottom: 15px;
+      background-color: #fff;
+      color: #333;
     }
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    button {
-      flex: 1;
-      padding: 10px;
-      background-color: #333;
+    .paste-btn {
+      padding: 12px 20px;
+      background-color: #e0e7ff;
       border: none;
       border-radius: 8px;
-      color: #f1f1f1;
+      color: #0056ff;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.3s;
     }
-    button:hover {
-      background-color: #444;
+    .paste-btn:hover {
+      background-color: #d1d9ff;
+    }
+    .download-btn {
+      width: 100%;
+      max-width: 500px;
+      padding: 15px;
+      background-color: #00c853;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .download-btn:hover {
+      background-color: #00b046;
     }
     #loading {
-      text-align: center;
       font-size: 1rem;
       margin-top: 10px;
       animation: blink 1s infinite;
@@ -84,90 +103,92 @@
     }
     #result {
       margin-top: 20px;
-      text-align: center;
+      max-width: 500px;
+      width: 100%;
     }
     video {
       width: 100%;
       margin-top: 10px;
       border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: #999;
+      background-color: #f5f5f5;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+    <div class="container">
     <div class="logo">
       <img src="https://raw.githubusercontent.com/Fiisya/uploads/main/uploads/1747051496492.jpeg" alt="TikTok Logo" />
     </div>
     <h1>TikTok Downloader</h1>
-    <input type="text" id="urlInput" placeholder="Masukkan URL TikTok..." />
-    <div class="button-group">
-      <button onclick="pasteLink()">Paste</button>
-      <button onclick="deleteLink()">Hapus</button>
-      <button onclick="download()">Download</button>
+    <p>Tiktok Downloader Tanpa Watermark. Cepat. Semua perangkat</p>
+    <div class="input-group">
+      <input type="text" id="urlInput" placeholder="Tempel tautan TikTok di sini" />
+      <button class="paste-btn" onclick="pasteLink()">Tempel</button>
     </div>
+    <button class="download-btn" onclick="download()">Download</button>
+
     <div id="result"></div>
-<div id="loading" style="display:none; text-align:center;">Loading...</div>
+    <div id="loading" style="display:none;">Loading...</div>
+  </div>
 
-<footer style="text-align: center; padding: 20px; font-size: 14px; color: #999;">
-  © 2025 AlfixD. All rights reserved.
-</footer>
+  <footer>
+    © 2025 AlfixD. All rights reserved.
+  </footer>
 
-  <!-- ... (keep the <head> and style as-is) ... -->
-<script>
-  async function pasteLink() {
-    try {
-      const text = await navigator.clipboard.readText();
-      document.getElementById("urlInput").value = text;
-    } catch {
-      alert("Gagal mengakses clipboard!");
-    }
-  }
-
-  function deleteLink() {
-    document.getElementById("urlInput").value = "";
-    document.getElementById("result").innerHTML = "";
-    document.getElementById("loading").style.display = "none";
-  }
-
-  async function download() {
-    const url = document.getElementById("urlInput").value;
-    if (!url) return alert("Masukkan URL TikTok!");
-
-    const loading = document.getElementById("loading");
-    const result = document.getElementById("result");
-    loading.style.display = "block";
-    result.innerHTML = "";
-
-    try {
-      const apiUrl = `https://api.alfixd.my.id/api/ttdl?url=${encodeURIComponent(url)}`;
-      const res = await fetch(apiUrl);
-      const data = await res.json();
-      loading.style.display = "none";
-
-      if (data.status === 200 && data.download_links.length) {
-        const mediaHtml = data.download_links.map(link => {
-          const isImage = /\.(jpeg|jpg|png|webp)/i.test(link.url);
-          const isAudio = /\.mp3/i.test(link.url);
-          if (isImage) {
-            return `<img src="${link.url}" alt="Photo Mode" style="max-width:100%; border-radius:10px; margin-bottom:10px;" loading="lazy" />`;
-          } else if (isAudio) {
-            return `<audio controls src="${link.url}" style="width:100%; margin-bottom:10px;"></audio>`;
-          } else {
-            return `<video controls src="${link.url}" style="width:100%; border-radius:10px; margin-bottom:10px;"></video>`;
-          }
-        }).join("");
-
-        result.innerHTML = `<p>✅ Media berhasil didapatkan:</p>${mediaHtml}`;
-      } else {
-        result.innerHTML = `<p style="color: #ff4c4c;">Tidak ada media ditemukan.</p>`;
+  <script>
+    async function pasteLink() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById("urlInput").value = text;
+      } catch {
+        alert("Gagal mengakses clipboard!");
       }
-    } catch (err) {
-      loading.style.display = "none";
-      result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan saat mengambil data.</p>`;
     }
-  }
-</script>
 
+    async function download() {
+      const url = document.getElementById("urlInput").value;
+      if (!url) return alert("Masukkan URL TikTok!");
+
+      const loading = document.getElementById("loading");
+      const result = document.getElementById("result");
+      loading.style.display = "block";
+      result.innerHTML = "";
+
+      try {
+        const apiUrl = `https://api.alfixd.my.id/api/ttdl?url=${encodeURIComponent(url)}`;
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        loading.style.display = "none";
+
+        if (data.status === 200 && data.download_links.length) {
+          const mediaHtml = data.download_links.map(link => {
+            const isImage = /\.(jpeg|jpg|png|webp)/i.test(link.url);
+            const isAudio = /\.mp3/i.test(link.url);
+            if (isImage) {
+              return `<img src="${link.url}" alt="Photo Mode" style="max-width:100%; border-radius:10px; margin-bottom:10px;" loading="lazy" />`;
+            } else if (isAudio) {
+              return `<audio controls src="${link.url}" style="width:100%; margin-bottom:10px;"></audio>`;
+            } else {
+              return `<video controls src="${link.url}" style="width:100%; border-radius:10px; margin-bottom:10px;"></video>`;
+            }
+          }).join("");
+
+          result.innerHTML = `<p>✅ Media berhasil didapatkan:</p>${mediaHtml}`;
+        } else {
+          result.innerHTML = `<p style="color: #ff4c4c;">Tidak ada media ditemukan.</p>`;
+        }
+      } catch (err) {
+        loading.style.display = "none";
+        result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan saat mengambil data.</p>`;
+      }
+    }
+  </script>
 </body>
 </html>
