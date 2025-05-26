@@ -147,7 +147,7 @@
 </head>
 <body>
   <div class="container">
-    <div class="logo">TikTok Downloader</div>
+    <div class="logo">SnapTik</div>
     <h1>Download video TikTok</h1>
     <p>Tiktok Downloader Tanpa Watermark. Cepat. Semua perangkat</p>
     <div class="input-group">
@@ -160,19 +160,19 @@
     <div id="loading" style="display:none;">Loading...</div>
 
     <div class="description">
-      <h2>Tentang TikTok Downloader</h2>
-      <p>TikTok Downloader adalah alat gratis untuk mengunduh video TikTok tanpa watermark. Dengan antarmuka yang sederhana dan cepat, Anda dapat menyimpan video favorit Anda langsung ke perangkat dalam beberapa klik. Kami mendukung semua perangkat, termasuk ponsel, tablet, dan komputer, tanpa perlu menginstal aplikasi tambahan.</p>
+      <h2>Tentang SnapTik</h2>
+      <p>SnapTik adalah alat gratis untuk mengunduh video TikTok tanpa watermark. Dengan antarmuka yang sederhana dan cepat, Anda dapat menyimpan video favorit Anda langsung ke perangkat dalam beberapa klik. Kami mendukung semua perangkat, termasuk ponsel, tablet, dan komputer, tanpa perlu menginstal aplikasi tambahan.</p>
     </div>
 
     <div class="qna">
       <h2>Pertanyaan Umum (Q&A)</h2>
-      <div class="question">Apa itu TikTok Downloader?</div>
-      <div class="answer">TikTok Downloader adalah layanan online yang memungkinkan Anda mengunduh video TikTok tanpa watermark dengan cepat dan mudah.</div>
+      <div class="question">Apa itu SnapTik?</div>
+      <div class="answer">SnapTik adalah layanan online yang memungkinkan Anda mengunduh video TikTok tanpa watermark dengan cepat dan mudah.</div>
 
-      <div class="question">Apakah TikTok Downloader gratis?</div>
-      <div class="answer">Ya, TikTok Downloader sepenuhnya gratis untuk digunakan. Tidak ada biaya tersembunyi atau langganan yang diperlukan.</div>
+      <div class="question">Apakah SnapTik gratis?</div>
+      <div class="answer">Ya, SnapTik sepenuhnya gratis untuk digunakan. Tidak ada biaya tersembunyi atau langganan yang diperlukan.</div>
 
-      <div class="question">Bagaimana cara menggunakan TikTok Downloader?</div>
+      <div class="question">Bagaimana cara menggunakan SnapTik?</div>
       <div class="answer">Cukup salin tautan video TikTok, tempelkan di kolom yang tersedia, lalu klik tombol "Download". Video akan diunduh tanpa watermark.</div>
     </div>
   </div>
@@ -181,53 +181,131 @@
     © 2025 AlfixD. All rights reserved.
   </footer>
 
-  <script>
-    async function pasteLink() {
-      try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById("urlInput").value = text;
-      } catch {
-        alert("Gagal mengakses clipboard!");
-      }
+  <!-- Ganti bagian dalam tag <script> paling bawah dengan ini -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  async function pasteLink() {
+    try {
+      const text = await navigator.clipboard.readText();
+      document.getElementById("urlInput").value = text;
+    } catch (err) {
+      alert("Gagal mengakses clipboard: " + err.message);
     }
+  }
 
-    async function download() {
-      const url = document.getElementById("urlInput").value;
-      if (!url) return alert("Masukkan URL TikTok!");
-
-      const loading = document.getElementById("loading");
-      const result = document.getElementById("result");
-      loading.style.display = "block";
-      result.innerHTML = "";
-
+  async function tiktokDownloaderVideo(url) {
+    return new Promise(async (resolve, reject) => {
       try {
-        const apiUrl = `https://api.alfixd.my.id/api/ttdl?url=${encodeURIComponent(url)}`;
-        const res = await fetch(apiUrl);
-        const data = await res.json();
-        loading.style.display = "none";
+        let data = [];
 
-        if (data.status === 200 && data.download_links.length) {
-          const mediaHtml = data.download_links.map(link => {
-            const isImage = /\.(jpeg|jpg|png|webp)/i.test(link.url);
-            const isAudio = /\.mp3/i.test(link.url);
-            if (isImage) {
-              return `<img src="${link.url}" alt="Photo Mode" style="max-width:100%; border-radius:10px; margin-bottom:10px;" loading="lazy" />`;
-            } else if (isAudio) {
-              return `<audio controls src="${link.url}" style="width:100%; margin-bottom:10px;"></audio>`;
-            } else {
-              return `<video controls src="${link.url}" style="width:100%; border-radius:10px; margin-bottom:10px;"></video>`;
-            }
-          }).join("");
-
-          result.innerHTML = `<p>✅ Media berhasil didapatkan:</p>${mediaHtml}`;
-        } else {
-          result.innerHTML = `<p style="color: #ff4c4c;">Tidak ada media ditemukan.</p>`;
+        function formatNumber(integer) {
+          return Number(parseInt(integer)).toLocaleString().replace(/,/g, ".");
         }
-      } catch (err) {
-        loading.style.display = "none";
-        result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan saat mengambil data.</p>`;
+
+        function formatDate(n, locale = "id-ID") {
+          let d = new Date(n * 1000);
+          return d.toLocaleString(locale, {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "numeric",
+            minute: "numeric"
+          });
+        }
+
+        let domain = "https://www.tikwm.com/api/";
+        let res = (await axios.post(domain, {}, {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Referer": "https://www.tikwm.com/",
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10)"
+          },
+          params: {
+            url,
+            count: 12,
+            cursor: 0,
+            web: 1,
+            hd: 1
+          }
+        })).data.data;
+
+        if (!res.size) {
+          res.images.forEach(v => {
+            data.push({ type: "photo", url: v });
+          });
+        } else {
+          data.push({
+            type: "watermark",
+            url: "https://www.tikwm.com" + res.wmplay
+          }, {
+            type: "nowatermark",
+            url: "https://www.tikwm.com" + res.play
+          }, {
+            type: "nowatermark_hd",
+            url: "https://www.tikwm.com" + res.hdplay
+          });
+        }
+
+        resolve({
+          status: true,
+          title: res.title,
+          taken_at: formatDate(res.create_time),
+          region: res.region,
+          id: res.id,
+          duration: res.duration + " detik",
+          cover: "https://www.tikwm.com" + res.cover,
+          music_info: {
+            title: res.music_info.title,
+            author: res.music_info.author,
+            url: "https://www.tikwm.com" + (res.music || res.music_info.play)
+          },
+          data,
+          author: {
+            nickname: res.author.nickname
+          }
+        });
+      } catch (e) {
+        reject(e);
       }
+    });
+  }
+
+  async function download() {
+    const url = document.getElementById("urlInput").value;
+    if (!url) {
+      alert("Masukkan URL TikTok!");
+      return;
     }
-  </script>
+
+    const loading = document.getElementById("loading");
+    const result = document.getElementById("result");
+    loading.style.display = "block";
+    result.innerHTML = "";
+
+    try {
+      const data = await tiktokDownloaderVideo(url);
+      loading.style.display = "none";
+
+      if (!data || !data.data || !data.data.length) {
+        result.innerHTML = `<p style="color: #ff4c4c;">Tidak ada media ditemukan.</p>`;
+        return;
+      }
+
+      const mediaHtml = data.data.map(item => {
+        if (item.type === "photo") {
+          return `<img src="${item.url}" alt="Photo Mode" style="max-width:100%; border-radius:10px; margin-bottom:10px;" loading="lazy" />`;
+        } else if (item.type.includes("nowatermark")) {
+          return `<video controls src="${item.url}" style="width:100%; border-radius:10px; margin-bottom:10px;"></video>`;
+        }
+      }).join("");
+
+      result.innerHTML = `<p>✅ Media berhasil didapatkan:</p>${mediaHtml}`;
+    } catch (err) {
+      loading.style.display = "none";
+      result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan: ${err.message}</p>`;
+    }
+  }
+</script>
 </body>
 </html>
