@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Facebook Downloader</title>
+  <title>TikTok Downloader</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     * {
@@ -13,70 +13,87 @@
     }
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #ffffff;
-      color: #333;
+      background-color: #f5f5f5;
+      color: #fff;
       min-height: 100vh;
-      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      background-color: #0056ff;
+      padding: 30px;
+      width: 100%;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
     .logo {
-      text-align: center;
       margin-bottom: 15px;
-    }
-    .logo img {
-      width: 48px;
-      height: 48px;
+      font-size: 2rem;
+      font-weight: 600;
+      color: #fff;
     }
     h1 {
       font-size: 1.8rem;
-      text-align: center;
       margin-bottom: 10px;
       font-weight: 600;
-      color: #333;
     }
-    .description {
-      font-size: 14px;
-      color: #666;
-      text-align: center;
+    p {
+      font-size: 1rem;
       margin-bottom: 20px;
-      line-height: 1.5;
+      color: #f1f1f1;
     }
     .input-group {
       display: flex;
-      flex-direction: column;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+      max-width: 500px;
+      width: 100%;
     }
     input {
-      width: 100%;
+      flex: 1;
       padding: 12px;
-      border: 1px solid #00cc66;
+      border: none;
       border-radius: 8px;
       font-size: 1rem;
       background-color: #fff;
       color: #333;
-      outline: none;
     }
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #00cc66;
+    .paste-btn {
+      padding: 12px 20px;
+      background-color: #e0e7ff;
       border: none;
       border-radius: 8px;
-      color: #fff;
+      color: #0056ff;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.3s;
     }
-    button:hover {
-      background-color: #00b359;
+    .paste-btn:hover {
+      background-color: #d1d9ff;
+    }
+    .download-btn {
+      width: 100%;
+      max-width: 500px;
+      padding: 15px;
+      background-color: #00c853;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .download-btn:hover {
+      background-color: #00b046;
     }
     #loading {
-      text-align: center;
       font-size: 1rem;
       margin-top: 10px;
       animation: blink 1s infinite;
-      display: none;
-      color: #666;
     }
     @keyframes blink {
       0%, 100% { opacity: 1; }
@@ -84,109 +101,131 @@
     }
     #result {
       margin-top: 20px;
-      text-align: center;
+      max-width: 500px;
+      width: 100%;
     }
-    video, img {
+    video {
       width: 100%;
       margin-top: 10px;
       border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
     }
-    a.download-link {
-      display: inline-block;
-      margin-top: 8px;
-      color: #00cc66;
-      font-weight: bold;
-      text-decoration: none;
+    .description, .qna {
+      max-width: 500px;
+      width: 100%;
+      margin-top: 40px;
+      text-align: left;
     }
-    a.download-link:hover {
-      text-decoration: underline;
+    .description h2, .qna h2 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: #fff;
     }
-    .app-links {
-      font-size: 14px;
-      color: #666;
-      text-align: center;
-      margin-top: 20px;
-      line-height: 1.5;
+    .description p {
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .qna .question {
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 1rem;
+    }
+    .qna .answer {
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      color: #f1f1f1;
+      line-height: 1.6;
     }
     footer {
       text-align: center;
-      padding: 20px 0;
+      padding: 20px;
       font-size: 14px;
       color: #999;
-      margin-top: 20px;
+      background-color: #f5f5f5;
     }
   </style>
 </head>
 <body>
-  <div class="logo">
-    <img src="https://raw.githubusercontent.com/Fiisya/uploads/main/uploads/1747124676903.jpeg" alt="Facebook Logo" />
+  <div class="container">
+    <div class="logo">TikTok Downloader</div>
+    <h1>Download video TikTok</h1>
+    <p>Tiktok Downloader Tanpa Watermark. Cepat. Semua perangkat</p>
+    <div class="input-group">
+      <input type="text" id="urlInput" placeholder="Tempel tautan TikTok di sini" />
+      <button class="paste-btn" onclick="pasteLink()">Tempel</button>
+    </div>
+    <button class="download-btn" onclick="download()">Download</button>
+
+    <div id="result"></div>
+    <div id="loading" style="display:none;">Loading...</div>
+
+    <div class="description">
+      <h2>Tentang TikTok Downloader</h2>
+      <p>TikTok Downloader adalah alat gratis untuk mengunduh video TikTok tanpa watermark. Dengan antarmuka yang sederhana dan cepat, Anda dapat menyimpan video favorit Anda langsung ke perangkat dalam beberapa klik. Kami mendukung semua perangkat, termasuk ponsel, tablet, dan komputer, tanpa perlu menginstal aplikasi tambahan.</p>
+    </div>
+
+    <div class="qna">
+      <h2>Pertanyaan Umum (Q&A)</h2>
+      <div class="question">Apa itu TikTok Downloader?</div>
+      <div class="answer">TikTok Downloader adalah layanan online yang memungkinkan Anda mengunduh video TikTok tanpa watermark dengan cepat dan mudah.</div>
+
+      <div class="question">Apakah TikTok Downloader gratis?</div>
+      <div class="answer">Ya, TikTok Downloader sepenuhnya gratis untuk digunakan. Tidak ada biaya tersembunyi atau langganan yang diperlukan.</div>
+
+      <div class="question">Bagaimana cara menggunakan TikTok Downloader?</div>
+      <div class="answer">Cukup salin tautan video TikTok, tempelkan di kolom yang tersedia, lalu klik tombol "Download". Video akan diunduh tanpa watermark.</div>
+    </div>
   </div>
-  <h1>Pengunduh Video Facebook</h1>
-  <p class="description">Alat untuk mengunduh video facebook Full HD, 1080p, 2k, 4k</p>
-  <div class="input-group">
-    <input type="text" id="urlInput" placeholder="Masukkan tautan video Facebook di sini" />
-    <button onclick="download()">Unduh</button>
-  </div>
-  <div id="result"></div>
-  <div id="loading" style="display:none;">Loading...</div>
-  
+
   <footer>
-    &copy; 2025 AlfixD. All rights reserved.
+    © 2025 AlfixD. All rights reserved.
   </footer>
 
   <script>
-    function pasteLink() {
-      navigator.clipboard.readText().then(text => {
-        document.getElementById('urlInput').value = text;
-      }).catch(() => alert('Gagal mengakses clipboard!'));
-    }
-
-    function deleteLink() {
-      document.getElementById('urlInput').value = '';
-      document.getElementById('result').innerHTML = '';
+    async function pasteLink() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById("urlInput").value = text;
+      } catch {
+        alert("Gagal mengakses clipboard!");
+      }
     }
 
     async function download() {
-      const url = document.getElementById('urlInput').value.trim();
-      const resultDiv = document.getElementById('result');
-      const loading = document.getElementById('loading');
+      const url = document.getElementById("urlInput").value;
+      if (!url) return alert("Masukkan URL TikTok!");
 
-      if (!url) return alert('URL tidak boleh kosong!');
-
-      resultDiv.innerHTML = '';
-      loading.style.display = 'block';
+      const loading = document.getElementById("loading");
+      const result = document.getElementById("result");
+      loading.style.display = "block";
+      result.innerHTML = "";
 
       try {
-        const response = await fetch(`https://api.alfixd.my.id/api/fbdl?url=${encodeURIComponent(url)}`);
-        const data = await response.json();
-        loading.style.display = 'none';
+        const apiUrl = `https://api.alfixd.my.id/api/ttdl?url=${encodeURIComponent(url)}`;
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        loading.style.display = "none";
 
-        if (data.status !== 200) {
-          resultDiv.innerHTML = '<p style="color: #ff4c4c;">Gagal mengambil data. Pastikan URL valid.</p>';
-          return;
+        if (data.status === 200 && data.download_links.length) {
+          const mediaHtml = data.download_links.map(link => {
+            const isImage = /\.(jpeg|jpg|png|webp)/i.test(link.url);
+            const isAudio = /\.mp3/i.test(link.url);
+            if (isImage) {
+              return `<img src="${link.url}" alt="Photo Mode" style="max-width:100%; border-radius:10px; margin-bottom:10px;" loading="lazy" />`;
+            } else if (isAudio) {
+              return `<audio controls src="${link.url}" style="width:100%; margin-bottom:10px;"></audio>`;
+            } else {
+              return `<video controls src="${link.url}" style="width:100%; border-radius:10px; margin-bottom:10px;"></video>`;
+            }
+          }).join("");
+
+          result.innerHTML = `<p>✅ Media berhasil didapatkan:</p>${mediaHtml}`;
+        } else {
+          result.innerHTML = `<p style="color: #ff4c4c;">Tidak ada media ditemukan.</p>`;
         }
-
-        <!-- Bagian dalam resultDiv -->
-resultDiv.innerHTML = `
-  <h3>${data.title}</h3>
-  <img src="${data.thumbnail}" alt="Thumbnail" />
-  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-    <a href="${data.download_link.hd}" target="_blank">
-      <button style="width: 100%; padding: 12px; background-color: #00cc66; border: none; border-radius: 8px; color: #fff; font-weight: 600; cursor: pointer;">
-        Download HD
-      </button>
-    </a>
-    <a href="${data.download_link.sd}" target="_blank">
-      <button style="width: 100%; padding: 12px; background-color: #00cc66; border: none; border-radius: 8px; color: #fff; font-weight: 600; cursor: pointer;">
-        Download SD
-      </button>
-    </a>
-  </div>
-`;
       } catch (err) {
-        loading.style.display = 'none';
-        resultDiv.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan: ${err.message}</p>`;
+        loading.style.display = "none";
+        result.innerHTML = `<p style="color: #ff4c4c;">Terjadi kesalahan saat mengambil data.</p>`;
       }
     }
   </script>
