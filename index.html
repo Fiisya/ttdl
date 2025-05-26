@@ -292,13 +292,26 @@
         return;
       }
 
-      const mediaHtml = data.data.map(item => {
-        if (item.type === "photo") {
-          return `<img src="${item.url}" alt="Photo Mode" style="max-width:100%; border-radius:10px; margin-bottom:10px;" loading="lazy" />`;
-        } else if (item.type.includes("nowatermark")) {
-          return `<video controls src="${item.url}" style="width:100%; border-radius:10px; margin-bottom:10px;"></video>`;
-        }
-      }).join("");
+      const mediaHtml = data.download_links.map(link => {
+  const isImage = /\.(jpeg|jpg|png|webp)/i.test(link.url);
+  const isAudio = /\.mp3/i.test(link.url);
+  let element = "";
+
+  if (isImage) {
+    element = `<img src="${link.url}" alt="Photo Mode" style="max-width:100%; border-radius:10px; margin-bottom:10px;" loading="lazy" />`;
+  } else if (isAudio) {
+    element = `<audio controls src="${link.url}" style="width:100%; margin-bottom:10px;"></audio>`;
+  } else {
+    element = `<video controls src="${link.url}" style="width:100%; border-radius:10px; margin-bottom:10px;"></video>`;
+  }
+
+  return `
+    <div style="margin-bottom:20px;">
+      ${element}
+      <a href="${link.url}" download style="display:inline-block; margin-top:5px; padding:10px 20px; background:#00c853; color:#fff; text-decoration:none; border-radius:6px; font-weight:600;">Download</a>
+    </div>
+  `;
+}).join("");
 
       result.innerHTML = `<p>✅ Media berhasil didapatkan:</p>${mediaHtml}`;
     } catch (err) {
