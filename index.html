@@ -185,146 +185,186 @@
   </div>
 
   <script>
-    async function pasteLink() {
-      try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById("urlInput").value = text;
-      } catch (err) {
-        alert("Gagal mengakses clipboard: " + err.message);
+    // Fungsi pembantu untuk memaksa download file
+async function forceDownload(url, fileName) {
+  // Tampilkan pesan bahwa proses download sedang berlangsung
+  const result = document.getElementById("result");
+  result.innerHTML = `<p>Sedang mempersiapkan unduhan untuk: <strong>${fileName}</strong>...</p>`;
+  
+  try {
+    // 1. Ambil data file sebagai 'blob'
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    // 2. Buat URL sementara untuk blob
+    const objectUrl = URL.createObjectURL(blob);
+
+    // 3. Buat link (<a>) virtual
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = fileName; // Tentukan nama file
+    document.body.appendChild(a); // Tambahkan ke dokumen agar bisa di-klik
+
+    // 4. Klik link virtual untuk memulai download
+    a.click();
+
+    // 5. Hapus link dan URL sementara setelah selesai
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
+    
+    // Tampilkan pesan sukses
+    result.innerHTML = `<p style="color:green;">✅ Unduhan <strong>${fileName}</strong> telah dimulai!</p>`;
+    
+  } catch (err) {
+    // Tampilkan pesan jika fetch atau prosesnya gagal
+    result.innerHTML = `<p style="color:red;">Gagal mengunduh file: ${err.message}</p>`;
+    console.error("Download error:", err);
+  }
+}
+
+
+// (Fungsi ini tidak perlu diubah)
+async function pasteLink() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById("urlInput").value = text;
+  } catch (err) {
+    alert("Gagal mengakses clipboard: " + err.message);
+  }
+}
+
+
+// (Fungsi ini tidak perlu diubah)
+async function tiktokDownloaderVideo(url) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let data = [];
+
+      function formatDate(n, locale = "id-ID") {
+        let d = new Date(n * 1000);
+        return d.toLocaleString(locale, {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+        });
       }
-    }
 
-    async function download() {
-      const url = document.getElementById("urlInput").value;
-      const loading = document.getElementById("loading");
-      const result = document.getElementById("result");
-      result.innerHTML = "";
-      if (!url) return alert("Masukkan URL TikTok!");
+      let domain = "https://www.tikwm.com/api/";
+      let res = (await axios.post(domain, {}, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          Referer: "https://www.tikwm.com/",
+          "User-Agent": "Mozilla/5.0 (Linux; Android 10)",
+        },
+        params: {
+          url,
+          count: 12,
+          cursor: 0,
+          web: 1,
+          hd: 1,
+        },
+      })).data.data;
 
-      loading.style.display = "block";
-
-      try {
-        const data = await tiktokDownloaderVideo(url);
-        loading.style.display = "none";
-
-        let html = `
-          <p><strong>Judul:</strong> ${data.title}</p>
-          <p><strong>Author:</strong> ${data.author.nickname}</p>
-          <p><strong>Durasi:</strong> ${data.duration}</p>
-        `;
-
-        html += data.data.map(media => {
-          const label = {
-            photo: "Gambar",
-            watermark: "Dengan Watermark",
-            nowatermark: "Tanpa Watermark",
-            nowatermark_hd: "HD Tanpa Watermark"
-          }[media.type] || "Media";
-
-          const ext = media.url.includes(".mp3") ? "audio" : media.url.includes(".jpg") || media.url.includes(".png") ? "img" : "video";
-
-          let mediaElement = "";
-          if (ext === "img") {
-            mediaElement = `<img src="${media.url}" style="width:100%;border-radius:10px;margin:10px 0;" loading="lazy">`;
-          } else if (ext === "audio") {
-            mediaElement = `<audio controls src="${media.url}" style="width:100%;margin:10px 0;"></audio>`;
-          } else {
-            mediaElement = `<video controls src="${media.url}" style="width:100%;border-radius:10px;margin:10px 0;"></video>`;
-          }
-
-          return `
-            <div>
-              <p><strong>${label}</strong></p>
-              ${mediaElement}
-              <a href="${media.url}" download class="download-btn" style="margin-top:10px;display:inline-block;text-decoration:none;">Download ${label}</a>
-            </div>
-          `;
-        }).join("");
-
-        result.innerHTML = html;
-      } catch (err) {
-        loading.style.display = "none";
-        result.innerHTML = `<p style="color:red;">Terjadi kesalahan: ${err.message}</p>`;
-      }
-    }
-
-    async function tiktokDownloaderVideo(url) {
-      return new Promise(async (resolve, reject) => {
-        try {
-          let data = [];
-
-          function formatNumber(integer) {
-            return Number(parseInt(integer)).toLocaleString().replace(/,/g, ".");
-          }
-
-          function formatDate(n, locale = "id-ID") {
-            let d = new Date(n * 1000);
-            return d.toLocaleString(locale, {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-              hour: "numeric",
-              minute: "numeric"
-            });
-          }
-
-          let domain = "https://www.tikwm.com/api/";
-          let res = (await axios.post(domain, {}, {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-              "Referer": "https://www.tikwm.com/",
-              "User-Agent": "Mozilla/5.0 (Linux; Android 10)"
-            },
-            params: {
-              url,
-              count: 12,
-              cursor: 0,
-              web: 1,
-              hd: 1
-            }
-          })).data.data;
-
-          if (!res.size && res.images) {
-            res.images.forEach(v => {
-              data.push({ type: "photo", url: v });
-            });
-          } else {
-            data.push({
-              type: "watermark",
-              url: "https://www.tikwm.com" + res.wmplay
-            }, {
-              type: "nowatermark",
-              url: "https://www.tikwm.com" + res.play
-            }, {
-              type: "nowatermark_hd",
-              url: "https://www.tikwm.com" + res.hdplay
-            });
-          }
-
-          resolve({
-            status: true,
-            title: res.title,
-            taken_at: formatDate(res.create_time),
-            region: res.region,
-            id: res.id,
-            duration: res.duration + " detik",
-            cover: "https://www.tikwm.com" + res.cover,
-            music_info: {
-              title: res.music_info.title,
-              author: res.music_info.author,
-              url: "https://www.tikwm.com" + (res.music || res.music_info.play)
-            },
-            data,
-            author: {
-              nickname: res.author.nickname
-            }
+      if (!res.size && res.images) {
+        res.images.forEach((v) => {
+          data.push({
+            type: "photo",
+            url: v
           });
-        } catch (e) {
-          reject(e);
-        }
+        });
+      } else {
+        data.push({
+          type: "watermark",
+          url: "https://www.tikwm.com" + res.wmplay,
+        }, {
+          type: "nowatermark",
+          url: "https://www.tikwm.com" + res.play,
+        }, {
+          type: "nowatermark_hd",
+          url: "https://www.tikwm.com" + res.hdplay,
+        });
+      }
+
+      resolve({
+        status: true,
+        title: res.title,
+        taken_at: formatDate(res.create_time),
+        region: res.region,
+        id: res.id,
+        duration: res.duration + " detik",
+        cover: "https://www.tikwm.com" + res.cover,
+        music_info: {
+          title: res.music_info.title,
+          author: res.music_info.author,
+          url: "https://www.tikwm.com" + (res.music || res.music_info.play),
+        },
+        data,
+        author: {
+          nickname: res.author.nickname,
+        },
       });
+    } catch (e) {
+      reject(e);
     }
+  });
+}
+
+// =========================================================
+// INI FUNGSI UTAMA YANG DIUBAH
+// =========================================================
+async function download() {
+  const url = document.getElementById("urlInput").value;
+  const loading = document.getElementById("loading");
+  const result = document.getElementById("result");
+  result.innerHTML = "";
+  if (!url) return alert("Masukkan URL TikTok!");
+
+  loading.style.display = "block";
+
+  try {
+    const data = await tiktokDownloaderVideo(url);
+    
+    // Cek apakah postingan ini video atau foto slide
+    const isPhotoPost = data.data.some(media => media.type === 'photo');
+
+    if (isPhotoPost) {
+      // Jika ini adalah postingan foto, unduh semua gambar
+      loading.style.display = "none";
+      result.innerHTML = `<p>Postingan berisi ${data.data.length} gambar. Mengunduh semua...</p>`;
+      
+      for (let i = 0; i < data.data.length; i++) {
+        const media = data.data[i];
+        const fileName = `${data.title || 'tiktok_image'}_${i + 1}.jpeg`;
+        // Menunggu setiap unduhan selesai sebelum memulai yang berikutnya
+        await forceDownload(media.url, fileName);
+      }
+      result.innerHTML += `<p style="color:green;">✅ Semua gambar berhasil diunduh!</p>`;
+
+    } else {
+      // Jika ini video, cari versi terbaik
+      const videoToDownload = data.data.find(media => media.type === 'nowatermark_hd') || data.data.find(media => media.type === 'nowatermark');
+
+      if (videoToDownload) {
+        // Buat nama file yang lebih baik
+        const fileName = `${data.author.nickname} - ${data.title || data.id}.mp4`;
+        
+        // Mulai download menggunakan fungsi pembantu
+        await forceDownload(videoToDownload.url, fileName);
+      } else {
+        throw new Error("Tidak ditemukan link video tanpa watermark.");
+      }
+    }
+    
+  } catch (err) {
+    result.innerHTML = `<p style="color:red;">Terjadi kesalahan: ${err.message}</p>`;
+  } finally {
+    // Selalu sembunyikan loading di akhir, baik berhasil maupun gagal
+    loading.style.display = "none";
+  }
+}
   </script>
 </body>
 </html>
